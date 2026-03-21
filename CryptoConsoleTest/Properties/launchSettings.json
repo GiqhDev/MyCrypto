@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CryptoConsoleTest": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
