@@ -1,6 +1,6 @@
 # 🔐 MyCrypto
 
-MyCrypto es una librería .NET diseñada para el cifrado, descifrado y hashing seguro de datos sensibles como contraseñas y claves, proporcionando una API simple y siguiendo buenas prácticas criptográficas.
+MyCrypto es una librería .NET diseñada para el cifrado, descifrado y hashing seguro de datos sensibles como contraseñas y claves, proporcionando una interfaz simple y siguiendo buenas prácticas criptográficas.
 
 ---
 
