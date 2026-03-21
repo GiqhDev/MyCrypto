@@ -1,52 +1,87 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 
-namespace MyCrypto
+namespace MyCrypto;
+
+public static class PasswordHasher
 {
-  public class PasswordHasher 
+  private const int SaltSize = 16;
+  private const int HashSize = 32;
+  private const int Iterations = 100_000;
+
+  /// <summary>
+  /// Format: {iterations}.{salt}.{hash}
+  /// </summary>
+  public static string Hash(string password)
   {
-    public static string HashPassword(string password)
-    {
-      byte[] bytes = Encoding.UTF8.GetBytes(password);
-      byte[] hash = null;
+    if (string.IsNullOrWhiteSpace(password))
+      throw new ArgumentException("Password cannot be empty", nameof(password));
+
+    byte[] salt = new byte[SaltSize];
 
 #if NET6_0_OR_GREATER
-       hash = SHA256.HashData(bytes);
+    RandomNumberGenerator.Fill(salt);
 #else
-    using (var sha256 = SHA256.Create())
-    {
-        hash = sha256.ComputeHash(bytes);
-    }
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(salt);
+        }
 #endif
 
-      StringBuilder sb = new StringBuilder(hash.Length * 2);
-      for (int i = 0; i < hash.Length; i++)
-      {
-        sb.Append(hash[i].ToString("x2"));
-      }
+    byte[] hash = DeriveKey(password, salt, Iterations, HashSize);
 
-      return sb.ToString();
-    }
+    return $"{Iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
+  }
 
-    public static bool VerifyPassword(string password, string base64Hash)
+  public static bool Verify(string password, string storedHash)
+  {
+    if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(storedHash))
+      return false;
+
+    var parts = storedHash.Split('.');
+    if (parts.Length != 3) return false;
+
+    if (!int.TryParse(parts[0], out int iterations)) return false;
+
+    try
     {
-      return HashPassword(password).Equals(base64Hash);
-    }
+      byte[] salt = Convert.FromBase64String(parts[1]);
+      byte[] hash = Convert.FromBase64String(parts[2]);
 
-    public static string CheckPasswordStrength(string password)
+      byte[] testHash = DeriveKey(password, salt, iterations, hash.Length);
+
+      return FixedTimeEquals(testHash, hash);
+    }
+    catch
     {
-      StringBuilder sb = new();
-      if (password.Length < 8)
-      {
-        sb.Append("La contraseña debe tener minimo 8 caracteres. " + Environment.NewLine);
-      }
-
-      if (!(Regex.IsMatch(password, "[a-z]") && Regex.IsMatch(password, "[A-Z]") && Regex.IsMatch(password, "[0-9]")))
-      {
-        sb.Append("La contraseña debe contener mayusculas, minusculas y numeros " + Environment.NewLine);
-      }
-      return sb.ToString();
+      return false;
     }
+  }
+
+  private static byte[] DeriveKey(string password, byte[] salt, int iterations, int outputBytes)
+  {
+#if NET6_0_OR_GREATER
+    return Rfc2898DeriveBytes.Pbkdf2(
+        password,
+        salt,
+        iterations,
+        HashAlgorithmName.SHA256,
+        outputBytes);
+#else
+        using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations))
+        {
+            return pbkdf2.GetBytes(outputBytes);
+        }
+#endif
+  }
+
+  private static bool FixedTimeEquals(byte[] a, byte[] b)
+  {
+    if (a.Length != b.Length) return false;
+
+    int diff = 0;
+    for (int i = 0; i < a.Length; i++)
+      diff |= a[i] ^ b[i];
+
+    return diff == 0;
   }
 }

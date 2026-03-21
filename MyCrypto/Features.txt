@@ -1,0 +1,129 @@
+﻿ public static class SecurityHelper
+  {
+    // Parámetros configurables
+    private const int SaltSize = 16; // bytes
+    private const int HashSize = 32; // bytes (256 bits)
+    private const int Iterations = 100_000; // recomendación actual razonable; ajustar según necesidades/hardware
+
+    // Formato de almacenamiento: {iterations}.{saltBase64}.{hashBase64}
+    public static string HashPassword(string password)
+    {
+      if (password == null) throw new ArgumentNullException(nameof(password));
+
+      byte[] salt = new byte[SaltSize];
+      using (var rng = RandomNumberGenerator.Create())
+      {
+        rng.GetBytes(salt);
+      }
+
+      byte[] hash = Pbkdf2(password, salt, Iterations, HashSize);
+
+      string result = $"{Iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
+      return result;
+    }
+
+    public static bool VerifyPassword(string password, string storedHash)
+    {
+      if (password == null) throw new ArgumentNullException(nameof(password));
+      if (string.IsNullOrWhiteSpace(storedHash)) return false;
+
+      // Esperamos formato: iterations.salt.hash
+      var parts = storedHash.Split('.');
+      if (parts.Length != 3) return false;
+
+      if (!int.TryParse(parts[0], out int iterations)) return false;
+
+      byte[] salt;
+      byte[] hash;
+      try
+      {
+        salt = Convert.FromBase64String(parts[1]);
+        hash = Convert.FromBase64String(parts[2]);
+      }
+      catch
+      {
+        return false;
+      }
+
+      byte[] testHash = Pbkdf2(password, salt, iterations, hash.Length);
+
+      return FixedTimeEquals(testHash, hash);
+    }
+
+    // Valida la seguridad de la contraseña y devuelve errores si no cumple
+    public static (bool IsValid, List<string> Errors) ValidatePasswordStrength(string password,
+        int minLength = 10,
+        int minUpper = 1,
+        int minLower = 1,
+        int minDigits = 1,
+        int minSpecial = 1)
+    {
+      var errors = new List<string>();
+
+      if (string.IsNullOrEmpty(password))
+      {
+        errors.Add("La contraseña no puede estar vacía.");
+        return (false, errors);
+      }
+
+      if (password.Length < minLength)
+        errors.Add($"La contraseña debe tener al menos {minLength} caracteres.");
+
+      int upper = password.Count(char.IsUpper);
+      int lower = password.Count(char.IsLower);
+      int digits = password.Count(char.IsDigit);
+      int special = password.Count(c => !char.IsLetterOrDigit(c));
+
+      if (upper < minUpper) errors.Add($"La contraseña debe contener al menos {minUpper} letra(s) mayúscula(s).");
+      if (lower < minLower) errors.Add($"La contraseña debe contener al menos {minLower} letra(s) minúscula(s).");
+      if (digits < minDigits) errors.Add($"La contraseña debe contener al menos {minDigits} dígito(s).");
+      if (special < minSpecial) errors.Add($"La contraseña debe contener al menos {minSpecial} carácter(es) especial(es).");
+
+      // Opcional: evitar contraseñas demasiado comunes (lista simple)
+      string lowerPwd = password.ToLowerInvariant();
+      var banned = new[] { "123456", "password", "qwerty", "admin", "12345678", "letmein", "usuario" };
+      if (banned.Any(b => lowerPwd.Contains(b)))
+        errors.Add("La contraseña es demasiado común o predecible.");
+
+      bool ok = errors.Count == 0;
+      return (ok, errors);
+    }
+
+    // Valida un email (con MailAddress y regex como respaldo)
+    public static bool ValidateEmail(string email)
+    {
+      if (string.IsNullOrWhiteSpace(email)) return false;
+
+      try
+      {
+        var addr = new MailAddress(email);
+        // MailAddress permite cosas raras, aplicamos una regex básica adicional
+        // regex simplificada para comprobación básica
+        const string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
+      }
+      catch
+      {
+        return false;
+      }
+    }
+
+    // --------- Helpers internos ---------
+    private static byte[] Pbkdf2(string password, byte[] salt, int iterations, int outputBytes)
+    {
+      using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
+      {
+        return pbkdf2.GetBytes(outputBytes);
+      }
+    }
+
+    // Comparación en tiempo fijo para prevenir timing attacks
+    private static bool FixedTimeEquals(byte[] a, byte[] b)
+    {
+      if (a == null || b == null || a.Length != b.Length) return false;
+      int diff = 0;
+      for (int i = 0; i < a.Length; i++)
+        diff |= a[i] ^ b[i];
+      return diff == 0;
+    }
+  }

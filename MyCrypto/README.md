@@ -6,12 +6,13 @@ MyCrypto es una librería .NET diseñada para el cifrado, descifrado y hashing s
 
 ## 🚀 Características
 
-* 🔒 Encriptación segura de datos
+* 🔒 Encriptación segura con AES (IV aleatorio)
 * 🔓 Desencriptación sencilla
-* 🔐 Hashing seguro de contraseñas
+* 🔐 Hashing seguro de contraseñas (PBKDF2 + salt)
+* ⚡ Hashing rápido (SHA256) para usos generales
 * ✅ Validación de fortaleza de contraseñas
 * 🧩 Integración rápida en cualquier proyecto .NET
-* 📦 Compatible con .NET moderno
+* 📦 Compatible con múltiples versiones de .NET
 
 ---
 
@@ -25,8 +26,10 @@ dotnet add package MyCrypto
 
 ## 🧠 Componentes principales
 
-* **CryptoHelper** → Encriptación y desencriptación
-* **PasswordHasher** → Hashing y validación de contraseñas
+* **CryptoHelper** → Encriptación y desencriptación (AES con IV dinámico)
+* **PasswordHasher** → Hashing seguro de contraseñas (PBKDF2)
+* **HashService** → Hashing rápido (SHA256, no para contraseñas)
+* **PasswordValidator** → Validación de fortaleza de contraseñas
 
 ---
 
@@ -35,42 +38,83 @@ dotnet add package MyCrypto
 ```csharp
 using MyCrypto;
 
+// 🔑 Generar una clave segura (32 bytes = AES-256)
+byte[] key = CryptoHelper.GenerateKey();
+
 string password = "MiPassword123!";
 
 // 🔒 Encriptar / Desencriptar
-string encrypted = CryptoHelper.Encrypt(password);
-string decrypted = CryptoHelper.Decrypt(encrypted);
+string encrypted = CryptoHelper.Encrypt(password, key);
+string decrypted = CryptoHelper.Decrypt(encrypted, key);
 
-// 🔐 Hashing de contraseñas
-string hashed = PasswordHasher.HashPassword(password);
-bool isValid = PasswordHasher.VerifyPassword(password, hashed);
+// 🔐 Hashing seguro de contraseñas
+string hashed = PasswordHasher.Hash(password);
+bool isValid = PasswordHasher.Verify(password, hashed);
+
+// ⚡ Hash rápido (NO usar para contraseñas)
+string sha256 = HashService.ComputeSha256(password);
 
 // ✅ Validación de seguridad
-bool isStrong = PasswordHasher.CheckPasswordStrength(password);
+var (isStrong, errors) = PasswordValidator.Validate(password);
 ```
+
+---
+
+## 🔐 Cómo funciona la encriptación
+
+* Se utiliza **AES**
+* El **IV se genera automáticamente en cada operación**
+* El IV se almacena junto con el texto cifrado
+* La clave (**key**) debe ser proporcionada por el usuario
 
 ---
 
 ## ⚠️ Buenas prácticas
 
-* No almacenar claves en texto plano
-* Usar variables de entorno para secretos
-* Mantener actualizada la librería
+* No almacenar contraseñas en texto plano
+* Usar hashing seguro (PBKDF2) para contraseñas
+* Usar cifrado solo cuando necesites recuperar el valor original
+* **Nunca hardcodear claves en el código**
+* Guardar claves en:
+
+  * Variables de entorno
+  * Azure Key Vault u otros gestores de secretos
+* Mantener la librería actualizada
 
 ---
 
 ## 🔐 Consideraciones de seguridad
 
-* El hashing es unidireccional (no se puede desencriptar)
-* Usa hashing para contraseñas, no cifrado
-* Protege adecuadamente las claves de cifrado
-* Esta librería no reemplaza una correcta gestión de secretos (ej: Azure Key Vault, variables de entorno)
+* El hashing de contraseñas es unidireccional (no se puede desencriptar)
+* **No uses SHA256 para contraseñas**, utiliza `PasswordHasher`
+* El IV es generado automáticamente para mayor seguridad
+* Esta librería no reemplaza una correcta gestión de secretos
+
+---
+
+## ⚠️ Breaking Changes (v2.0.0)
+
+Esta versión introduce cambios incompatibles con versiones anteriores:
+
+* Se eliminaron claves e IV hardcodeados en `CryptoHelper`
+* Ahora la clave debe ser proporcionada por el usuario
+* Se implementa IV dinámico para mejorar la seguridad
+* Se renombraron métodos:
+
+  * `HashPassword` → `Hash`
+  * `VerifyPassword` → `Verify`
+* Se separaron responsabilidades en nuevas clases:
+
+  * `HashService` para hashing rápido (SHA256)
+  * `PasswordValidator` para validación de contraseñas
+
+👉 Si vienes de versiones anteriores, deberás actualizar el uso de la API.
 
 ---
 
 ## 📌 Versión
 
-Versión actual: 1.0.1
+Versión actual: **2.0.0**
 
 ---
 
