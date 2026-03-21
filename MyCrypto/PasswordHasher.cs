@@ -8,10 +8,24 @@ namespace MyCrypto
   {
     public static string HashPassword(string password)
     {
-      ASCIIEncoding encoding = new();
-      StringBuilder sb = new();
-      byte[] stream = SHA256.HashData(encoding.GetBytes(password));
-      for (int i = 0; i < stream.Length; i++) sb.AppendFormat("{0:x2}", stream[i]);
+      byte[] bytes = Encoding.UTF8.GetBytes(password);
+      byte[] hash = null;
+
+#if NET6_0_OR_GREATER
+       hash = SHA256.HashData(bytes);
+#else
+    using (var sha256 = SHA256.Create())
+    {
+        hash = sha256.ComputeHash(bytes);
+    }
+#endif
+
+      StringBuilder sb = new StringBuilder(hash.Length * 2);
+      for (int i = 0; i < hash.Length; i++)
+      {
+        sb.Append(hash[i].ToString("x2"));
+      }
+
       return sb.ToString();
     }
 
