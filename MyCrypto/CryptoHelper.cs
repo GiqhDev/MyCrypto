@@ -10,14 +10,14 @@ public static class CryptoHelper
     using var aes = Aes.Create();
 
     aes.Key = key;
-    aes.GenerateIV(); // 🔥 IV aleatorio
+    aes.GenerateIV(); 
 
     using var encryptor = aes.CreateEncryptor();
 
     byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
     byte[] cipherBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
 
-    // 👉 Guardamos IV + datos cifrados
+    
     byte[] result = new byte[aes.IV.Length + cipherBytes.Length];
     Buffer.BlockCopy(aes.IV, 0, result, 0, aes.IV.Length);
     Buffer.BlockCopy(cipherBytes, 0, result, aes.IV.Length, cipherBytes.Length);
@@ -32,7 +32,7 @@ public static class CryptoHelper
     using var aes = Aes.Create();
     aes.Key = key;
 
-    // 👉 Extraer IV
+    
     byte[] iv = new byte[16];
     byte[] cipherBytes = new byte[fullCipher.Length - 16];
 
