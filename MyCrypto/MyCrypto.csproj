@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>Librería .NET para encriptar y desencriptar claves de forma simple y segura.</Description>
+    <Description>Libreria .NET para cifrado autenticado, hashing seguro de contrasenas y utilidades criptograficas.</Description>
     <Copyright>2026 Create by GiqhDev</Copyright>
     <PackageIcon>myicon.png</PackageIcon>
     <Title>MyCrypto</Title>
@@ -16,7 +16,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/gqh22/MyCrypto.git</RepositoryUrl>
-    <Version>2.0.0</Version>
+    <Version>3.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
