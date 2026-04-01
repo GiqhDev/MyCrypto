@@ -1,23 +1,23 @@
-# MyCrypto
+# 🔐 MyCrypto
 
-MyCrypto es una libreria .NET para cifrado, descifrado y hashing seguro de datos sensibles. La API mantiene un uso simple, puede leer formatos heredados y ahora protege los nuevos payloads cifrados con autenticacion.
+MyCrypto es una librería .NET para cifrado, descifrado y hashing seguro de datos sensibles. La API mantiene un uso simple, puede leer formatos heredados y ahora protege los nuevos payloads cifrados con autenticación.
 
-## Caracteristicas
+## 🚀 Características
 
-- Cifrado autenticado basado en AES-CBC + HMAC-SHA256.
-- Compatibilidad de lectura para payloads cifrados con el formato heredado.
-- Hashing de contrasenas con PBKDF2 y formato versionado.
-- Verificacion compatible con hashes heredados basados en PBKDF2-SHA1.
-- Hash SHA256 para usos generales que no sean contrasenas.
-- Validador de fortaleza para contrasenas.
+- 🔒 Cifrado autenticado basado en AES-CBC + HMAC-SHA256.
+- 🔓 Compatibilidad de lectura para payloads cifrados con el formato heredado.
+- 🔐 Hashing de contraseñas con PBKDF2 y formato versionado.
+- ♻️ Verificación compatible con hashes heredados basados en PBKDF2-SHA1.
+- ⚡ Hash SHA256 para usos generales que no sean contraseñas.
+- ✅ Validador de fortaleza para contraseñas.
 
-## Instalacion
+## 📥 Instalación
 
 ```bash
 dotnet add package MyCrypto.GiqhDev
 ```
 
-## Uso basico
+## 🛠️ Uso básico
 
 ```csharp
 using MyCrypto;
@@ -36,44 +36,44 @@ string sha256 = HashService.ComputeSha256(password);
 var (isStrong, errors) = PasswordValidator.Validate(password);
 ```
 
-## CryptoHelper
+## 🔐 CryptoHelper
 
 - `Encrypt` genera un payload con formato `v2.{iv}.{cipher}.{tag}`.
 - `Decrypt` valida el `tag` antes de descifrar.
-- `Decrypt` tambien puede leer el formato heredado que almacenaba `IV + ciphertext` en Base64.
+- `Decrypt` también puede leer el formato heredado que almacenaba `IV + ciphertext` en Base64.
 - `GenerateKey()` genera 32 bytes aleatorios por defecto.
 
-## PasswordHasher
+## 🧠 PasswordHasher
 
 - `Hash` genera hashes con formato `v2.{iterations}.{salt}.{hash}`.
 - `Verify` acepta hashes nuevos con PBKDF2-SHA256 y hashes heredados de 3 segmentos con PBKDF2-SHA1.
-- Si tienes hashes heredados, puedes rehashearlos gradualmente cuando el usuario inicie sesion correctamente.
+- Si tienes hashes heredados, puedes rehashearlos gradualmente cuando el usuario inicie sesión correctamente.
 
-## Buenas practicas
+## ⚠️ Buenas prácticas
 
-- No uses `HashService` para almacenar contrasenas.
-- No hardcodees claves en el codigo.
+- No uses `HashService` para almacenar contraseñas.
+- No hardcodees claves en el código.
 - Guarda las claves en variables de entorno o gestores de secretos.
 - Usa cifrado solo cuando realmente necesites recuperar el valor original.
 
-## Compatibilidad
+## 📦 Compatibilidad
 
-La libreria se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, `net5.0` y `netstandard2.0`.
+La librería se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, `net5.0` y `netstandard2.0`.
 
-## Migracion a v3
+## 🔄 Migración a v3
 
 - `CryptoHelper.Encrypt` ya no devuelve el Base64 legado de `IV + ciphertext`.
-- El nuevo formato de salida es `v2.{iv}.{cipher}.{tag}` y agrega autenticacion del payload.
+- El nuevo formato de salida es `v2.{iv}.{cipher}.{tag}` y agrega autenticación del payload.
 - `CryptoHelper.Decrypt` sigue pudiendo leer ciphertexts generados por versiones anteriores.
 - `PasswordHasher.Hash` ahora genera `v2.{iterations}.{salt}.{hash}`.
 - `PasswordHasher.Verify` sigue aceptando hashes heredados de 3 segmentos.
-- Si tu aplicacion guarda el valor exacto generado por `Encrypt` o `Hash`, debes asumir que el formato escrito cambió en esta major.
+- Si tu aplicación guarda el valor exacto generado por `Encrypt` o `Hash`, debes asumir que el formato escrito cambió en esta major.
 
-## Validacion
+## ✅ Validación
 
-La solucion ahora incluye pruebas automatizadas para:
+La solución ahora incluye pruebas automatizadas para:
 
 - Round-trip de cifrado y descifrado.
-- Deteccion de payloads manipulados.
+- Detección de payloads manipulados.
 - Compatibilidad con ciphertexts heredados.
 - Compatibilidad con hashes heredados.
