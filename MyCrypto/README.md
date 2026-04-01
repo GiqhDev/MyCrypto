@@ -1,129 +1,63 @@
-﻿# 🔐 MyCrypto
+# MyCrypto
 
-MyCrypto es una librería .NET diseñada para el cifrado, descifrado y hashing seguro de datos sensibles como contraseñas y claves, proporcionando una interfaz simple y siguiendo buenas prácticas criptográficas.
+MyCrypto es una libreria .NET para cifrado, descifrado y hashing seguro de datos sensibles. La API mantiene un uso simple, puede leer formatos heredados y protege los nuevos payloads cifrados con autenticacion.
 
----
+## Caracteristicas
 
-## 🚀 Características
+- Cifrado autenticado basado en AES-CBC + HMAC-SHA256.
+- Compatibilidad de lectura para payloads cifrados con el formato heredado.
+- Hashing de contrasenas con PBKDF2 y formato versionado.
+- Verificacion compatible con hashes heredados basados en PBKDF2-SHA1.
+- Hash SHA256 para usos generales que no sean contrasenas.
+- Validador de fortaleza para contrasenas.
 
-* 🔒 Encriptación segura con AES (IV aleatorio)
-* 🔓 Desencriptación sencilla
-* 🔐 Hashing seguro de contraseñas (PBKDF2 + salt)
-* ⚡ Hashing rápido (SHA256) para usos generales
-* ✅ Validación de fortaleza de contraseñas
-* 🧩 Integración rápida en cualquier proyecto .NET
-* 📦 Compatible con múltiples versiones de .NET
-
----
-
-## 📥 Instalación
+## Instalacion
 
 ```bash
-dotnet add package MyCrypto
+dotnet add package MyCrypto.GiqhDev
 ```
 
----
-
-## 🧠 Componentes principales
-
-* **CryptoHelper** → Encriptación y desencriptación (AES con IV dinámico)
-* **PasswordHasher** → Hashing seguro de contraseñas (PBKDF2)
-* **HashService** → Hashing rápido (SHA256, no para contraseñas)
-* **PasswordValidator** → Validación de fortaleza de contraseñas
-
----
-
-## 🛠️ Uso básico
+## Uso basico
 
 ```csharp
 using MyCrypto;
 
-// 🔑 Generar una clave segura (32 bytes = AES-256)
 byte[] key = CryptoHelper.GenerateKey();
-
 string password = "MiPassword123!";
 
-// 🔒 Encriptar / Desencriptar
 string encrypted = CryptoHelper.Encrypt(password, key);
 string decrypted = CryptoHelper.Decrypt(encrypted, key);
 
-// 🔐 Hashing seguro de contraseñas
-string hashed = PasswordHasher.Hash(password);
-bool isValid = PasswordHasher.Verify(password, hashed);
+string passwordHash = PasswordHasher.Hash(password);
+bool isValidPassword = PasswordHasher.Verify(password, passwordHash);
 
-// ⚡ Hash rápido (NO usar para contraseñas)
 string sha256 = HashService.ComputeSha256(password);
 
-// ✅ Validación de seguridad
 var (isStrong, errors) = PasswordValidator.Validate(password);
 ```
 
----
+## Detalles tecnicos
 
-## 🔐 Cómo funciona la encriptación
+- `CryptoHelper.Encrypt` devuelve `v2.{iv}.{cipher}.{tag}`.
+- `CryptoHelper.Decrypt` valida primero el `tag` y luego descifra.
+- `PasswordHasher.Hash` devuelve `v2.{iterations}.{salt}.{hash}`.
+- `PasswordHasher.Verify` acepta formatos heredados para facilitar migraciones.
 
-* Se utiliza **AES**
-* El **IV se genera automáticamente en cada operación**
-* El IV se almacena junto con el texto cifrado
-* La clave (**key**) debe ser proporcionada por el usuario
+## Recomendaciones
 
----
+- Usa `PasswordHasher` para contrasenas.
+- Usa `CryptoHelper` solo cuando realmente necesites recuperar el valor original.
+- Guarda las claves fuera del repositorio.
+- Rehashea hashes heredados cuando el usuario vuelva a autenticarse correctamente.
 
-## ⚠️ Buenas prácticas
+## Compatibilidad
 
-* No almacenar contraseñas en texto plano
-* Usar hashing seguro (PBKDF2) para contraseñas
-* Usar cifrado solo cuando necesites recuperar el valor original
-* **Nunca hardcodear claves en el código**
-* Guardar claves en:
+La libreria se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, `net5.0` y `netstandard2.0`.
 
-  * Variables de entorno
-  * Azure Key Vault u otros gestores de secretos
-* Mantener la librería actualizada
+## Migracion a v3
 
----
-
-## 🔐 Consideraciones de seguridad
-
-* El hashing de contraseñas es unidireccional (no se puede desencriptar)
-* **No uses SHA256 para contraseñas**, utiliza `PasswordHasher`
-* El IV es generado automáticamente para mayor seguridad
-* Esta librería no reemplaza una correcta gestión de secretos
-
----
-
-## ⚠️ Breaking Changes (v2.0.0)
-
-Esta versión introduce cambios incompatibles con versiones anteriores:
-
-* Se eliminaron claves e IV hardcodeados en `CryptoHelper`
-* Ahora la clave debe ser proporcionada por el usuario
-* Se implementa IV dinámico para mejorar la seguridad
-* Se renombraron métodos:
-
-  * `HashPassword` → `Hash`
-  * `VerifyPassword` → `Verify`
-* Se separaron responsabilidades en nuevas clases:
-
-  * `HashService` para hashing rápido (SHA256)
-  * `PasswordValidator` para validación de contraseñas
-
-👉 Si vienes de versiones anteriores, deberás actualizar el uso de la API.
-
----
-
-## 📌 Versión
-
-Versión actual: **2.0.0**
-
----
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Puedes abrir un issue o enviar un pull request.
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+- `CryptoHelper.Encrypt` ahora escribe `v2.{iv}.{cipher}.{tag}`.
+- `CryptoHelper.Decrypt` mantiene compatibilidad con ciphertexts heredados.
+- `PasswordHasher.Hash` ahora escribe `v2.{iterations}.{salt}.{hash}`.
+- `PasswordHasher.Verify` mantiene compatibilidad con hashes heredados.
+- Si dependias del formato exacto generado por las versiones previas, esta version debe tratarse como una major.
