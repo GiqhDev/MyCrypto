@@ -4,5 +4,7 @@
     <Project Path="MyCryptoConsoleNetFrameworkTest/MyCryptoConsoleNetFrameworkTest.csproj" Id="a10a255a-792c-4095-a198-c67cc5c30e56" />
   </Folder>
   <Project Path="MyCrypto/MyCrypto.csproj" />
-  <Project Path="MyCrypto.Tests/MyCrypto.Tests.csproj" />
+  <Project Path="MyCrypto.Tests/MyCrypto.Tests.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
 </Solution>
