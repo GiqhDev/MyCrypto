@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>Libreria .NET para cifrado autenticado, hashing seguro de contrasenas y utilidades criptograficas.</Description>
     <Copyright>2026 Create by GiqhDev</Copyright>
-    <PackageIcon>myicon.png</PackageIcon>
+    <PackageIcon>mycrypto logo.png</PackageIcon>
     <Title>MyCrypto</Title>
     <Authors>GiqhDev</Authors>
     <PackageId>$(AssemblyName).$(Authors)</PackageId>
@@ -16,11 +16,16 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/gqh22/MyCrypto.git</RepositoryUrl>
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
+    <ApplicationIcon>mycrypto logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="myicon.png">
+    <Content Include="mycrypto logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="mycrypto logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

@@ -4,6 +4,13 @@ Todos los cambios importantes de este proyecto se documentan en este archivo.
 
 El formato sigue una estructura simple inspirada en Keep a Changelog y versionado semantico.
 
+## [3.1.0] - 2026-07-10
+
+### Changed
+
+- Actualizado el logo del paquete NuGet con el nuevo diseño de MyCrypto (`mycrypto logo.png`).
+- Actualizada la documentación de migración para incluir v3.1.0.
+
 ## [3.0.0] - 2026-04-01
 
 ### Added

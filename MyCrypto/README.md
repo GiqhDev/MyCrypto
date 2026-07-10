@@ -54,7 +54,12 @@ var (isStrong, errors) = PasswordValidator.Validate(password);
 
 La librería se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, `net5.0` y `netstandard2.0`.
 
-## 🔄 Migración a v3
+## 🔄 Migración a v3.1.0
+
+- Se actualizó el logo del paquete NuGet con el nuevo diseño de MyCrypto.
+- No hay cambios de breaking respecto a v3.0.0.
+
+## 🔄 Migración a v3.0.0
 
 - `CryptoHelper.Encrypt` ahora escribe `v2.{iv}.{cipher}.{tag}`.
 - `CryptoHelper.Decrypt` mantiene compatibilidad con ciphertexts heredados.

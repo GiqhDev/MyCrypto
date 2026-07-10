@@ -60,7 +60,12 @@ var (isStrong, errors) = PasswordValidator.Validate(password);
 
 La librería se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, `net5.0` y `netstandard2.0`.
 
-## 🔄 Migración a v3
+## 🔄 Migración a v3.1.0
+
+- Se actualizó el logo del paquete NuGet con el nuevo diseño de MyCrypto.
+- No hay cambios de breaking respect a v3.0.0.
+
+## 🔄 Migración a v3.0.0
 
 - `CryptoHelper.Encrypt` ya no devuelve el Base64 legado de `IV + ciphertext`.
 - El nuevo formato de salida es `v2.{iv}.{cipher}.{tag}` y agrega autenticación del payload.
@@ -71,7 +76,7 @@ La librería se compila para `net10.0`, `net9.0`, `net8.0`, `net7.0`, `net6.0`, 
 
 ## ✅ Validación
 
-La solución ahora incluye pruebas automatizadas para:
+La solución incluye pruebas automatizadas para:
 
 - Round-trip de cifrado y descifrado.
 - Detección de payloads manipulados.
