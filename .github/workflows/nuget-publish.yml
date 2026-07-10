@@ -8,13 +8,11 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 env:
   SOLUTION_PATH: MyCrypto.slnx
   PACKAGE_PROJECT_PATH: MyCrypto/MyCrypto.csproj
   PACKAGE_OUTPUT_PATH: artifacts/packages
-  NUGET_SOURCE: https://api.nuget.org/v3/index.json
 
 jobs:
   publish:
@@ -45,15 +43,9 @@ jobs:
       - name: List packages
         run: Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -File
 
-      - name: NuGet login
-        uses: NuGet/login@v1
-        id: nuget-login
-        with:
-          user: GiqhDev
-
-      - name: Publish package
+      - name: Publish to NuGet
         run: |
           Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -Filter *.nupkg -File |
             ForEach-Object {
-              dotnet nuget push $_.FullName --source $env:NUGET_SOURCE --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
+              dotnet nuget push $_.FullName --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
             }
