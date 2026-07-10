@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   SOLUTION_PATH: MyCrypto.slnx
@@ -43,9 +44,15 @@ jobs:
       - name: List packages
         run: Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -File
 
+      - name: NuGet login (OIDC)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: GiqhDev
+
       - name: Publish to NuGet
         run: |
           Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -Filter *.nupkg -File |
             ForEach-Object {
-              dotnet nuget push $_.FullName --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+              dotnet nuget push $_.FullName --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --skip-duplicate
             }
