@@ -2,31 +2,58 @@ name: Publish NuGet
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
   workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  SOLUTION_PATH: MyCrypto.slnx
+  PACKAGE_PROJECT_PATH: MyCrypto/MyCrypto.csproj
+  PACKAGE_OUTPUT_PATH: artifacts/packages
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    name: Build, test, pack and publish
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore MyCrypto.slnx
+        run: dotnet restore $env:SOLUTION_PATH
+
+      - name: Build
+        run: dotnet build $env:SOLUTION_PATH -c Release --no-restore
 
       - name: Test
-        run: dotnet test MyCrypto.slnx --configuration Release --no-restore
+        run: dotnet test $env:SOLUTION_PATH -c Release --no-build --verbosity normal
 
       - name: Pack
-        run: dotnet pack MyCrypto/MyCrypto.csproj --configuration Release --no-restore -o ./artifacts
+        run: dotnet pack $env:PACKAGE_PROJECT_PATH -c Release --no-build -o $env:PACKAGE_OUTPUT_PATH
 
-      - name: Publish to NuGet
-        run: dotnet nuget push "./artifacts/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+      - name: List packages
+        run: Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -File
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: GiqhDev
+
+      - name: Publish package
+        run: |
+          Get-ChildItem -Path $env:PACKAGE_OUTPUT_PATH -Filter *.nupkg -File |
+            ForEach-Object {
+              dotnet nuget push $_.FullName --source $env:NUGET_SOURCE --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --skip-duplicate
+            }
