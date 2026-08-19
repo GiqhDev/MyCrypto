@@ -21,7 +21,7 @@ public static class HashService
         hash = sha256.ComputeHash(bytes);
 #endif
 
-    StringBuilder sb = new StringBuilder(hash.Length * 2);
+    StringBuilder sb = new(hash.Length * 2);
 
     foreach (var b in hash)
       sb.Append(b.ToString("x2"));
